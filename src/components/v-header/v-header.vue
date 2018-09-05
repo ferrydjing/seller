@@ -4,6 +4,19 @@
             <div class="avatar">
                 <img :src="seller.avatar" width="64" height="64" alt="">
             </div>
+            <div class="content">
+                <div class="title">
+                    <span class="brand"></span>
+                    <span class="name">{{seller.name}}</span>
+                </div>
+                <div class="description">
+                    {{seller.description}} / {{seller.deliveryTime}}分钟送达
+                </div>
+                <div v-if="seller.supports" class="support">
+                    <span class="icon"></span>
+                    <span class="text">{{seller.supports[0].description}}</span>
+                </div>
+            </div>
         </div>
         <div class="bulletin_wrap"></div>
     </div>
@@ -20,4 +33,25 @@ export default {
 </script>
 
 <style lang="stylus">
+    @import "../../common/stylus/mixin"
+    .header
+        color #ffffff
+        background  #000000
+        .content_wrap
+            padding 24px 12px 18px 24px
+            font-size 0
+            .avatar
+                display inline-block
+            .content
+                display inline-block
+                margin-left 16px
+                font-size  14px
+                .title
+                    margin 2px 0 8px 0
+                    .brand
+                        display inline-block
+                        width 30px
+                        height 18px
+                        bg-image('brand')
+
 </style>
