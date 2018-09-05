@@ -28,7 +28,7 @@
       return {seller: {}}
     },
     mounted () {
-      this.$http.get('/api/seller').then((res) => {
+      this.axios.get('/api/seller').then((res) => {
         let data = res.data
         if (data.errno === ERR_OK) {
           this.seller = data.data
