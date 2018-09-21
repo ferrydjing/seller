@@ -15,7 +15,7 @@
                 <li class="goods-item food-list-hook" v-for="(good,index) in goods" :key="index">
                     <h1 class="goods-title">{{good.name}}</h1>
                     <ul>
-                        <li class="foods-item" v-for="(food,food_idx) in good.foods" :key="food_idx">
+                        <li class="foods-item" v-for="(food,food_idx) in good.foods" :key="food_idx" @click="selectFood(food,$event)">
                             <div class="icon">
                                 <img :src="food.icon" alt="" width="57" height="57"/>
                             </div>
@@ -28,23 +28,25 @@
                                 <div class="price">
                                     <span class="now">￥{{food.price}}</span><span class="old" v-if="food.oldPrice">￥{{food.oldPrice}}</span>
                                 </div>
-                                <div class="car-control-wrap">
-                                    <car-control></car-control>
-                                </div>
+                            </div>
+                            <div class="car-control-wrap" @click.stop.prevent>
+                                <car-control @add="foodAdd" :food="food"></car-control>
                             </div>
                         </li>
                     </ul>
                 </li>
             </ul>
         </div>
-        <shopcart :deliveryPrice="seller.deliveryPrice" :minPrice="seller.minPrice"/>
+        <shopcart ref="foodCart" :deliveryPrice="seller.deliveryPrice" :minPrice="seller.minPrice" :selectFoods="selectFoods"/>
+        <food :food="selectedFood" ref="foodComponent" @add="foodAdd"/>
     </div>
 </template>
 
 <script>
+    import BScroll from 'better-scroll'
     import carControl from 'components/car-control/car-control'
     import shopcart from 'components/shopcart/shopcart'
-    import BScroll from 'better-scroll'
+    import food from 'components/food/food'
 
     const ERR_OK = 0
     export default {
@@ -62,7 +64,8 @@
                 goodsScroll: {
                 },
                 listHeight: [],
-                scrollY: 0
+                scrollY: 0,
+                selectedFood: {}
             }
         },
         computed: {
@@ -75,6 +78,17 @@
                     }
                 }
                 return 0
+            },
+            selectFoods () {
+                let foods = []
+                this.goods.forEach((good) => {
+                    good.foods.forEach((food) => {
+                        if (food.count) {
+                            foods.push(food)
+                        }
+                    })
+                })
+                return foods
             }
         },
         mounted () {
@@ -95,7 +109,8 @@
                     click: true
                 })
                 this.goodsScroll = new BScroll(this.$refs.goodsWrapper, {
-                    probeType: 3
+                    probeType: 3,
+                    click: true
                 })
 
                 this.goodsScroll.on('scroll', (pos) => {
@@ -119,11 +134,25 @@
                 let foodList = this.$refs.goodsWrapper.getElementsByClassName('food-list-hook')
                 let el = foodList[index]
                 this.goodsScroll.scrollToElement(el, 300)
+            },
+            _drop (target) {
+                this.$nextTick(() => {
+                    this.$refs.foodCart.drop(target)
+                })
+            },
+            foodAdd (target) {
+                console.log('add emit')
+                this._drop(target)
+            },
+            selectFood (food, event) {
+                this.selectedFood = food
+                this.$refs.foodComponent.show()
             }
         },
         components: {
             'car-control': carControl,
-            shopcart
+            shopcart,
+            food
         }
     }
 </script>
@@ -235,8 +264,8 @@
                                 font-weight normal
                                 font-size 10px;
                                 color rgb(147,153,159)
-                        .car-control-wrap
-                            position absolute
-                            right 0
-                            bottom 12px
+                    .car-control-wrap
+                        position absolute
+                        right 0
+                        bottom 12px
 </style>
