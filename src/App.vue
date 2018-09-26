@@ -12,12 +12,17 @@
         <router-link to="/seller">商家</router-link>
       </div>
     </div>
-    <router-view :seller="seller"></router-view>
+    <keep-alive>
+      <router-view :seller="seller"></router-view>
+    </keep-alive>
   </div>
 </template>
 
 <script>
   import vheader from 'components/v-header/v-header.vue'
+  let utils = require('common/js/utils')
+  console.log(utils)
+
   const ERR_OK = 0
   export default {
     name: 'App',
@@ -25,13 +30,20 @@
       'v-header': vheader
     },
     data () {
-      return {seller: {}}
+      return {seller: {
+        id: (() => {
+          console.log()
+          var obj = utils.urlParse(window.location.search)
+          return obj.id
+        })()
+      }}
     },
     mounted () {
-      this.axios.get('/api/seller').then((res) => {
+      this.axios.get('/api/seller?id=' + this.seller.id).then((res) => {
         let data = res.data
         if (data.errno === ERR_OK) {
-          this.seller = data.data
+          // this.seller = data.data
+          this.seller = Object.assign({}, this.seller, data.data)
         }
       })
     }

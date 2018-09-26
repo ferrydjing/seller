@@ -38,13 +38,35 @@
                     @changeOnlyContent="changeOnlyContent"
                 />
             </div>
-            <div class="rating-list"></div>
+            <div class="rating-list" v-show="ratings.length">
+                <ul>
+                    <li class="rating-item" v-for="(rating,index) in ratings" :key="index" v-show="ratingShow(rating.rateType, rating.text)">
+                        <div class="user-wrapper">
+                            <img :src="rating.avatar" width="28" height="28" alt="">
+                        </div>
+                        <div class="rating-content">
+                            <div class="title">{{rating.username}}</div>
+                            <div class="rating-score-wrapper">
+                                <star :size="24" :score="rating.score" class="rating-star" />
+                                <span>{{rating.deliveryTime}}分钟送达</span>
+                            </div>
+                            <div class="rating-text">{{rating.text}}</div>
+                            <div class="rating-recommend-wrapper" v-show="rating.recommend && rating.recommend.length">
+                                <span class="icon-thumb_up"></span>
+                                <div class="rating-recommend" v-for="(recommend,idx) in rating.recommend" :key="idx">{{recommend}}</div>
+                            </div>
+                            <div class="rating-time">{{rating.rateTime | formatData}}</div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
         </div>
     </div>
 </template>
 
 <script>
     import BScroll from 'better-scroll'
+    import DateFormat from 'common/js/date'
     import star from 'components/star/star'
     import split from 'components/split/split'
     import ratingselect from 'components/ratingselect/ratingselect'
@@ -61,16 +83,39 @@
             return {
                 selectType: ALL,
                 onlyContent: false,
-                ratings: {}
+                ratings: []
             }
         },
         methods: {
            changeSelectType (type) {
                this.selectType = type
+               this.$nextTick(() => {
+                    this.ratingScroll.refresh()
+                })
            },
            changeOnlyContent (val) {
                this.onlyContent = val
+               this.$nextTick(() => {
+                    this.ratingScroll.refresh()
+                })
+           },
+           ratingShow (type, text) {
+                if (this.selectType === ALL) {
+                   return true
+                }
+                if (this.onlyContent && text === '') {
+                    return false
+                } else {
+                    return type === this.selectType
+                }
            }
+        },
+        filters: {
+            formatData (time) {
+                let date = new Date(time)
+
+                return DateFormat(date, 'yyyy-MM-dd hh:mm')
+            }
         },
         components: {
             star,
@@ -98,9 +143,10 @@
 <style lang="stylus">
     .ratings
         position absolute
-        width 100%
         top 174px
         left 0
+        bottom 0
+        width 100%
         overflow hidden
         .overview
             display flex
@@ -129,12 +175,12 @@
                 padding-left 24px
                 .score-wrapper
                     margin-bottom 8px
-                    line-height 18px
                     font-size 0
                     color rgb(7,17,27)
                     .star-desc
                         display inline-block
                         margin-right 12px
+                        line-height 18px
                         vertical-align top
                         font-size 12px
                     .star-wrapper
@@ -157,4 +203,59 @@
                     .delivery-info
                         font-size 12px
                         color rgb(147,153,159)
+        .rating-list
+            .rating-item
+                display flex
+                margin 0 18px
+                padding 18px 0
+                .user-wrapper
+                    flex 0 0 28px
+                    margin-right 12px
+                    width 28px
+                    img
+                        border-radius 50%
+                .rating-content
+                    position relative
+                    flex 1
+                    .title
+                        margin-bottom 4px
+                        line-height 12px
+                        font-size 10px
+                        color rgb(7, 17, 27)
+                    .rating-score-wrapper
+                        margin-bottom 6px
+                        font-size 0
+                        .rating-star
+                            display inline-block
+                            margin-right 6px
+                        span
+                            line-height 12px
+                            font-size 10px
+                            color rgb(147, 153, 159)
+                    .rating-text
+                        margin-bottom 8px
+                        line-height 18px
+                        font-size 12px
+                        color rgb(7, 17, 27)
+                    .rating-recommend-wrapper
+                        line-height 16px
+                        font-size 0
+                        .icon-thumb_up
+                            display inline-block
+                            margin 0 8px 4px 0
+                            font-size 9px
+                            color rgb(0, 160, 220)
+                        .rating-recommend
+                            display inline-block
+                            margin 0 8px 4px 0
+                            padding 0 6px
+                            border 1px solid rgba(7, 17, 27, 0.1)
+                            font-size 9px
+                            color rgb(147, 153, 159)
+                    .rating-time
+                        position absolute
+                        right 0
+                        top 0
+                        font-size 10px
+                        color rgb(147, 153, 159)
 </style>
